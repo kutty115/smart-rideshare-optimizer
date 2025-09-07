@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Ride-Sharing Optimizer</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="#">Smart Ride-Sharing Optimizer</a>
+        </div>
+    </nav>
+
+    <div class="container">
+
+        <!-- Ride Request Section -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                Request a Ride
+            </div>
+            <div class="card-body">
+                <form method="POST" action="/request_ride" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Rider Name</label>
+                        <input type="text" name="rider_name" class="form-control" placeholder="Enter your name" required>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Source</label>
+                        <select name="source" class="form-select" required>
+                            {% for node in nodes %}
+                            <option value="{{ node }}">{{ node }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">Destination</label>
+                        <select name="destination" class="form-select" required>
+                            {% for node in nodes %}
+                            <option value="{{ node }}">{{ node }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-12">
+                        <button type="submit" class="btn btn-success">🚖 Request Ride</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Available Drivers -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-info text-white">
+                Available Drivers
+            </div>
+            <div class="card-body">
+                {% if drivers %}
+                <ul class="list-group">
+                    {% for d in drivers %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ d.name }} (📍 {{ d.location }})
+                        {% if d.available %}
+                            <span class="badge bg-success">Available</span>
+                        {% else %}
+                            <span class="badge bg-danger">Busy</span>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">No drivers available yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Waiting Queue -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-warning">
+                Waiting Queue
+            </div>
+            <div class="card-body">
+                {% if waiting_queue %}
+                <ul class="list-group">
+                    {% for r in waiting_queue %}
+                    <li class="list-group-item">{{ r['rider_name'] }} ({{ r['source'] }} → {{ r['destination'] }})</li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">No riders in waiting queue.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Active Rides -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-success text-white">
+                Active Rides
+            </div>
+            <div class="card-body">
+                {% if active_rides %}
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Rider</th>
+                            <th>Driver</th>
+                            <th>Pickup Path</th>
+                            <th>Trip Path</th>
+                            <th>Distance</th>
+                            <th>Fare</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ride in active_rides %}
+                        <tr>
+                            <td>{{ ride.rider_name }}</td>
+                            <td>{{ ride.driver }}</td>
+                            <td>{{ ride.pickup_path }}</td>
+                            <td>{{ ride.trip_path }}</td>
+                            <td>{{ ride.distance }} km</td>
+                            <td>₹{{ ride.fare }}</td>
+                            <td>
+                                <form method="POST" action="/complete_ride/{{ ride.rider_name }}">
+                                    <button class="btn btn-sm btn-danger">Complete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No active rides currently.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Completed Rides -->
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-secondary text-white">
+                Completed Rides
+            </div>
+            <div class="card-body">
+                {% if completed_rides %}
+                <table class="table table-bordered">
+                    <thead>
+                        <tr>
+                            <th>Rider</th>
+                            <th>Driver</th>
+                            <th>Trip Path</th>
+                            <th>Fare</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ride in completed_rides %}
+                        <tr>
+                            <td>{{ ride.rider_name }}</td>
+                            <td>{{ ride.driver }}</td>
+                            <td>{{ ride.trip_path }}</td>
+                            <td>₹{{ ride.fare }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p class="text-muted">No rides completed yet.</p>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+
